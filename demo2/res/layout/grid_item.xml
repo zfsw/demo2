@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:orientation="vertical" 
+    android:background="@drawable/add_gridview">
+
+    <TextView
+        android:id="@+id/griditem_tv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F8F8F8"
+        android:textColor="#000000"
+        android:gravity="center"
+        android:singleLine="true"
+        android:text="444" />
+
+</RelativeLayout>

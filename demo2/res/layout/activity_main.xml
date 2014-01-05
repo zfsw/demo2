@@ -1,0 +1,179 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity" >
+
+    <!-- 点击之前的效果 -->
+
+    <RelativeLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <LinearLayout
+            android:id="@+id/tabs_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <com.astuetz.PagerSlidingTabStrip
+                android:id="@+id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:background="@drawable/background_tabs"
+                app:pstsDividerColor="#00000000"
+                app:pstsIndicatorColor="#FF33B5E6"
+                app:pstsTabPaddingLeftRight="14dip"
+                app:pstsUnderlineColor="#FF33B5E6" />
+
+            <RelativeLayout
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_weight="0"
+                android:background="#E7E7E7" >
+
+                <ImageButton
+                    android:id="@+id/ib"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_centerInParent="true"
+                    android:background="@null"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/biz_news_column_edit_arrow_down" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/pager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tabs_ll"
+            tools:context=".MainActivity" />
+    </RelativeLayout>
+    <!-- 点击之后的效果 -->
+
+    <RelativeLayout
+        android:id="@+id/clicked_fl"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" >
+
+        <!-- 标题栏区加按钮区 -->
+
+        <RelativeLayout
+            android:id="@+id/title_button_clicked"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#E7E7E7"
+            android:padding="5dp"
+            >
+
+            <RelativeLayout
+                android:id="@+id/title_clicked"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/title_clicked_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:text="17个未读栏目点击进入" />
+
+                <RelativeLayout
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignBottom="@+id/title_clicked_tv"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignTop="@+id/title_clicked_tv"
+                    android:layout_centerVertical="true"
+                    android:background="#E7E7E7" >
+
+                    <ImageButton
+                        android:id="@+id/title_clicked_ib"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_centerInParent="true"
+                        android:background="@null"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/biz_news_column_edit_arrow_up" />
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/clicked_rl_buttonChoice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_below="@+id/title_clicked" >
+
+                <Button
+                    android:id="@+id/gridview_content_bt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="完成"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/gridview_content_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:text="长按排序或点击删除" />
+            </RelativeLayout>
+        </RelativeLayout>
+        
+         <com.example.demo2.DynamicGridView
+                android:id="@+id/dynamic_grid"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/title_button_clicked"
+                android:layout_marginTop="10dp"
+                android:columnWidth="90dp"
+                android:horizontalSpacing="10dp"
+                android:numColumns="4"
+                android:stretchMode="columnWidth"
+                android:verticalSpacing="10dp" />
+    </RelativeLayout>
+
+    <!-- 增加区gridview -->
+
+    <RelativeLayout
+        android:id="@+id/ll_add"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="#E7E7E7"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/gridview_add_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="点击添加"
+                android:textColor="#000000" />
+
+            <com.example.demo2.BaseGridview
+                android:id="@+id/gridview_add"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:columnWidth="90dp"
+                android:horizontalSpacing="10dp"
+                android:numColumns="4"
+                android:stretchMode="columnWidth"
+                android:verticalSpacing="10dp" >
+            </com.example.demo2.BaseGridview>
+        </LinearLayout>
+    </RelativeLayout>
+
+</FrameLayout>

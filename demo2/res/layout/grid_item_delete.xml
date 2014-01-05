@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/griditem_delete_tv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F8F8F8"
+        android:gravity="center"
+        android:singleLine="true"
+        android:text="444" />
+
+    <ImageView
+        android:visibility="gone"
+        android:id="@+id/griditem_delete_iv"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:scaleType="fitXY"
+      />
+
+</RelativeLayout>
