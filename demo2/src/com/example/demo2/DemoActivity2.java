@@ -21,7 +21,6 @@ import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
@@ -56,13 +55,11 @@ public class DemoActivity2 extends FragmentActivity {
 	private Button bt_com;
 	private String[] contentArrays = { "toutiao", "sports", "movie", "picture",
 			"politics", "Paid", "Free", "Trending" };
-	private String[] addArrays = { "寰崥", "绀句細", "NBA", "鍥介檯瓒崇悆", "CBA", "鎵嬫満",
-			"鏁扮爜", "绉诲姩浜掕仈", "鐪熻瘽", "娓告垙", "鏃呮父", "鎯呮劅", "鍏荤敓", "鏁欒偛" };
+	private String[] addArrays = {"微博", "社会", "NBA", "国际足球", "CBA", "手机",
+            "数码", "移动互联", "真话", "游戏", "旅游", "情感", "养生", "教育" };
 	private boolean isEdit = false;
 	private final static String SPLIT = ",";
 	private boolean isFirstLogin = true;
-	
-	private WindowManager windowManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +69,6 @@ public class DemoActivity2 extends FragmentActivity {
 	}
 
 	private void init() {
-		windowManager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
 		isFirstLogin = getLoginState();
 		if (isFirstLogin) {
 			isFirstLogin = false;
@@ -127,12 +123,6 @@ public class DemoActivity2 extends FragmentActivity {
 	private void setListener() {
 		gv_content = (DynamicGridView) findViewById(R.id.dynamic_grid);
 		contentAdapter = new CheeseDynamicAdapter(this, contents, 4);
-//		contentAdapter.setmNotifyDataCallback(new NotifyDataCallback() {
-//			@Override
-//			public void onNotifyData() {
-//				contentAdapter.getImages().clear();
-//			}
-//		});
 		gv_content.setAdapter(contentAdapter);
 		gv_content
 				.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -245,7 +235,7 @@ public class DemoActivity2 extends FragmentActivity {
 				showNotClicked();
 				pager.setCurrentItem(pager.getCurrentItem());
 				break;
-			// 鐐瑰嚮瀹屾垚
+			// 点击完成
 			case R.id.gridview_content_bt:
 				if (gv_content.isEditMode()) {
 					isEdit = false;
@@ -256,8 +246,9 @@ public class DemoActivity2 extends FragmentActivity {
 					} else {
 						ll_add.setVisibility(View.INVISIBLE);
 					}
-					if(!gv_content.isFirstDown())
+//					if(!gv_content.isFirstDown())
 						gv_content.setFirstDown(true);
+					gv_content.clearFloatingView();
 					hideDelete();
 					sotrTabs();
 				}
@@ -300,8 +291,10 @@ public class DemoActivity2 extends FragmentActivity {
 			saveTabTileAndAddData();
 			super.onBackPressed();
 		}
-		if(!gv_content.isFirstDown())
+		gv_content.clearFloatingView();
+		if(!gv_content.isFirstDown()){
 			gv_content.setFirstDown(true);
+		}
 	}
 
 	private void showClicked() {
