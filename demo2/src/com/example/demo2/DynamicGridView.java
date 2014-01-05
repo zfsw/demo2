@@ -11,6 +11,7 @@ import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
+import android.app.Service;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -18,9 +19,9 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
+import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -70,6 +71,13 @@ public class DynamicGridView extends BaseGridview {
 	private float yDownInScreen;
 	private float xInView;
 	private float yInView;
+	private float initialX;
+	private float initialY;
+	private float initialTouchX;
+	private float initialTouchY ;
+	private float touchX;
+	private float touchY ;
+	 private Vibrator mVibrator; 
 	private WindowManager.LayoutParams mParams;
 	private static int statusBarHeight;
 	private boolean mLongclick = false;
@@ -106,14 +114,24 @@ public class DynamicGridView extends BaseGridview {
 		public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int pos, long id) {
 			if (!isEnabled() || isEditMode())
 				return false;
+			mVibrator.vibrate(2000);
 			mTotalOffsetY = 0;
 			mTotalOffsetX = 0;
 			int position = pointToPosition(mDownX, mDownY);
 			int itemNum = position - getFirstVisiblePosition();
-			if (itemNum > 1) {// 澧炲姞鐨勫唴瀹癸紝闃叉绗竴涓拰绗簩涓帶浠惰鐐瑰嚮
+			if (itemNum > 1) {
 				View selectedView = getChildAt(itemNum);
 				mMobileItemId = getAdapter().getItemId(position);
 				mHoverCell = getAndAddHoverView(selectedView);
+				if (!isAdded) {
+					mParams = initFloatingViewParams((int) (xInScreen-mDownX+selectedView.getLeft()-selectedView.getWidth()/2), (int)( yInScreen-mDownY+selectedView.getTop()+selectedView.getHeight()/2), selectedView.getWidth(), selectedView.getHeight());
+					Bitmap b = getBitmapFromView(selectedView);
+					ImageView mobileImageview = new ImageView(getContext().getApplicationContext());
+					currentMobileImageview=mobileImageview;
+					mobileImageview.setImageDrawable(new BitmapDrawable(getResources(), b));
+					windowManager.addView(mobileImageview, mParams);
+					isAdded = true;
+				}
 				if (isPostHoneycomb())
 					selectedView.setVisibility(View.INVISIBLE);
 				mCellIsMobile = true;
@@ -135,12 +153,7 @@ public class DynamicGridView extends BaseGridview {
 	private OnItemClickListener mLocalItemClickListener = new OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			System.out.println("------------onItemClick");
-			// if (!isEditMode() && isEnabled() && mUserItemClickListener !=
-			// null)
-			// {
 			mUserItemClickListener.onItemClick(parent, view, position, id);
-			// }
 		}
 	};
 
@@ -180,7 +193,7 @@ public class DynamicGridView extends BaseGridview {
 
 	public void stopEditMode() {
 		mIsEditMode = false;
-		if (isPostHoneycomb() && mWobbleInEditMode)
+//		if (isPostHoneycomb() && mWobbleInEditMode)
 			stopWobble(true);
 	}
 
@@ -249,6 +262,7 @@ public class DynamicGridView extends BaseGridview {
 	public void init(Context context) {
 		setOnScrollListener(mScrollListener);
 		windowManager = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+		mVibrator= ( Vibrator )context.getSystemService( Service.VIBRATOR_SERVICE);
 		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 		mSmoothScrollAmountAtEdge = (int) (SMOOTH_SCROLL_AMOUNT_AT_EDGE * metrics.density + 0.5f);
 	}
@@ -311,7 +325,7 @@ public class DynamicGridView extends BaseGridview {
 		mHoverCellOriginalBounds = new Rect(left, top, left + w, top + h);
 		mHoverCellCurrentBounds = new Rect(mHoverCellOriginalBounds);
 
-		drawable.setBounds(mHoverCellCurrentBounds);
+//		drawable.setBounds(mHoverCellCurrentBounds);
 
 		return drawable;
 	}
@@ -376,15 +390,18 @@ public class DynamicGridView extends BaseGridview {
 	public boolean onTouchEvent(MotionEvent event) {
 		switch (event.getAction() & MotionEvent.ACTION_MASK) {
 		case MotionEvent.ACTION_DOWN:
-			// System.out.println("----ACTION_DOWN");
+			if(isAdded){
+				initialX = mParams.x;
+				initialY = mParams.y;
+				initialTouchX = event.getRawX();
+				initialTouchY = event.getRawY();
+			}
 			mDownX = (int) event.getX();
 			mDownY = (int) event.getY();
 			xInView = event.getX();
 			yInView = event.getY();
 			xInScreen = event.getRawX();
 			yInScreen = event.getRawY() - getStatusBarHeight();
-			Log.i(tag, "----xInScreen: " + xInScreen + ",yInScreen:" + yInScreen);
-			Log.i(tag, "----mDownX: " + mDownX + ",mDownY:" + mDownY);
 			mActivePointerId = event.getPointerId(0);
 			if (mIsEditMode && isEnabled()) {
 				layoutChildren();
@@ -398,18 +415,14 @@ public class DynamicGridView extends BaseGridview {
 				} else {
 					mMobileItemId = getAdapter().getItemId(position);
 					mHoverCell = getAndAddHoverView(selectedView);
-//					mHoverCell = getAndAddHoverView(selectedView);
 					if (!isAdded) {
-//						mParams = initFloatingViewParams((int) (xInScreen-mDownX+selectedView.getLeft()), (int)( yInScreen-mDownY+selectedView.getTop()), selectedView.getWidth(), selectedView.getHeight());
-						mParams = initFloatingViewParams((int) (mDownX), (int)(mDownY), selectedView.getWidth(), selectedView.getHeight());
-						// mHoverCell.setBounds(new Rect(selectedView.getLeft(),
-						// selectedView.getTop(), selectedView.getRight(),
-						// selectedView.getBottom()));
+//						mParams = initFloatingViewParams((int) (xInScreen-mDownX+selectedView.getLeft()/2), (int)( yInScreen-mDownY+selectedView.getTop()), selectedView.getWidth(), selectedView.getHeight());
+//						mParams = initFloatingViewParams((int) (mDownX), (int)(mDownY), selectedView.getWidth(), selectedView.getHeight());
+						mParams = initFloatingViewParams((int) (xInScreen), (int)(yInScreen), selectedView.getWidth(), selectedView.getHeight());
 						Bitmap b = getBitmapFromView(selectedView);
 						ImageView mobileImageview = new ImageView(getContext().getApplicationContext());
 						currentMobileImageview=mobileImageview;
 						mobileImageview.setImageDrawable(new BitmapDrawable(getResources(), b));
-						Log.w(tag, "mParams:+ " + mParams);
 						windowManager.addView(mobileImageview, mParams);
 						isAdded = true;
 					}
@@ -431,9 +444,10 @@ public class DynamicGridView extends BaseGridview {
 			mLastEventX = (int) event.getX(pointerIndex);
 			int deltaY = mLastEventY - mDownY;
 			int deltaX = mLastEventX - mDownX;
-			xInScreen = event.getRawX();
+					touchY=event.getRawY();
+					touchX=xInScreen = event.getRawX();
 			yInScreen = event.getRawY() - getStatusBarHeight();
-			if (mCellIsMobile && !lockMove) {
+				if (mCellIsMobile) {
 //				 mHoverCellCurrentBounds.offsetTo(mHoverCellOriginalBounds.left
 //				 + deltaX + mTotalOffsetX,
 //				 mHoverCellOriginalBounds.top + deltaY + mTotalOffsetY);
@@ -442,8 +456,7 @@ public class DynamicGridView extends BaseGridview {
 				updateViewPosition();
 				handleCellSwitch();
 				mIsMobileScrolling = false;
-				// handleMobileCellScroll();
-				// System.out.println("----ACTION_MOVE");
+				 handleMobileCellScroll();
 				return false;
 			}
 
@@ -453,16 +466,10 @@ public class DynamicGridView extends BaseGridview {
 			if (mDropListener != null) {
 				mDropListener.onActionDrop();
 			}
-			if (mLongclick)
-				lockMove = false;
-			if (isFirstDown) {
-				isFirstDown = false;
-			}
 			if (isAdded) {
 				windowManager.removeView(currentMobileImageview);
 				isAdded = false;
 			}
-			// System.out.println("----ACTION_UP");
 			break;
 		case MotionEvent.ACTION_CANCEL:
 			touchEventsCancelled();
@@ -483,6 +490,12 @@ public class DynamicGridView extends BaseGridview {
 		return super.onTouchEvent(event);
 	}
 
+	
+	public void clearFloatingView(){
+		if(windowManager!=null&&isAdded&&currentMobileImageview!=null){
+			windowManager.removeView(currentMobileImageview);
+		}
+	}
 	private android.view.WindowManager.LayoutParams initFloatingViewParams(int l, int t, int width, int height) {
 		android.view.WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,
 				WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_PRIORITY_PHONE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
@@ -491,22 +504,6 @@ public class DynamicGridView extends BaseGridview {
 		params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
 				| WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 		params.windowAnimations = 0;
-		/* DisplayMetrics metrics = new DisplayMetrics();
-		    windowManager.getDefaultDisplay().getMetrics(metrics);
-		    params.horizontalMargin = (float)50 / (float)metrics.widthPixels;
-		params.horizontalMargin=5;*/
-		// params.type = android.view.WindowManager.LayoutParams.TYPE_PHONE;
-		// params.type =
-		// android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
-		// params.format = PixelFormat.RGBA_8888;
-		// params.flags =
-		// android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-		// | android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-		// params.flags =
-		// android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-		// params.gravity = Gravity.LEFT | Gravity.TOP;
-		// params.width = width;
-		// params.height = height;
 		params.x = l;
 		params.y = t;
 		return params;
@@ -546,17 +543,11 @@ public class DynamicGridView extends BaseGridview {
 			mIsWaitingForScrollFinish = false;
 			mIsMobileScrolling = false;
 			mActivePointerId = INVALID_ID;
-			// If the autoscroller has not completed scrolling, we need to wait
-			// for it to
-			// finish in order to determine the final location of where the
-			// hover cell
-			// should be animated to.
 			if (mScrollState != OnScrollListener.SCROLL_STATE_IDLE) {
 				mIsWaitingForScrollFinish = true;
 				return;
 			}
 			mHoverCellCurrentBounds.offsetTo(mobileView.getLeft(), mobileView.getTop());
-
 			if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
 				animateBounds(mobileView);
 			} else {
@@ -815,11 +806,11 @@ public class DynamicGridView extends BaseGridview {
 	}
 
 	/**
-	 * 鏇存柊灏忔偓娴獥鍦ㄥ睆骞曚腑鐨勪綅缃� 淇敼 澧炲姞
+	 * 
 	 */
 	public void updateViewPosition() {
-		mParams.x = (int) (xInScreen - xInView);
-		mParams.y = (int) (yInScreen - yInView);
+		mParams.x = (int) (initialX + (int) (touchX - initialTouchX));
+		mParams.y = (int) (initialY + (int) (touchY - initialTouchY));
 		windowManager.updateViewLayout(currentMobileImageview, mParams);
 	}
 
