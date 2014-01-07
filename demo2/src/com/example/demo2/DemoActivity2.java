@@ -3,10 +3,7 @@ package com.example.demo2;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import com.astuetz.PagerSlidingTabStrip;
-import com.example.demo2.BaseDynamicGridAdapter.NotifyDataCallback;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -18,6 +15,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.View;
@@ -27,7 +25,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -43,11 +40,10 @@ public class DemoActivity2 extends FragmentActivity {
 	private RelativeLayout rl_content;
 	private RelativeLayout rl_title_clicked;
 	private RelativeLayout ll_clicled;
-	private RelativeLayout ll_add;//澧炲姞鍖�
+	private RelativeLayout ll_add;// add
 	private DynamicGridView gv_content;
 	private BaseGridview gv_add;
 	private TextView clicked_title_tv;
-	private TextView gridview_add_tv;
 	private List<String> contents;
 	private List<String> adds;
 	private CheeseDynamicAdapter contentAdapter;
@@ -55,11 +51,15 @@ public class DemoActivity2 extends FragmentActivity {
 	private Button bt_com;
 	private String[] contentArrays = { "toutiao", "sports", "movie", "picture",
 			"politics", "Paid", "Free", "Trending" };
-	private String[] addArrays = {"微博", "社会", "NBA", "国际足球", "CBA", "手机",
-            "数码", "移动互联", "真话", "游戏", "旅游", "情感", "养生", "教育" };
+	private String[] addArrays = { "微博", "社会", "NBA", "国际足球", "CBA", "手机",
+			"数码", "移动互联", "真话", "游戏", "旅游", "情感", "养生", "教育" };
 	private boolean isEdit = false;
 	private final static String SPLIT = ",";
 	private boolean isFirstLogin = true;
+	private boolean isMainTabPage = true;
+	private long exitTime = 0;
+	private String tag = "DemoActivity2";
+	private int currentSelectedItem=-1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -92,10 +92,9 @@ public class DemoActivity2 extends FragmentActivity {
 		bt_com = (Button) findViewById(R.id.gridview_content_bt);
 		ll_add = (RelativeLayout) findViewById(R.id.ll_add);
 		rl_content = (RelativeLayout) findViewById(R.id.content);
-		ll_clicled = (RelativeLayout) findViewById(R.id.clicked_fl);// 鐐瑰嚮鍖哄唴瀹规暣浣擄紙鏍囬鏍�鎸夐挳鍖�gridview锛�
-		rl_title_clicked = (RelativeLayout) findViewById(R.id.title_clicked);// 鐐瑰嚮鍖虹殑content鐨刧ridview涓婃柟鐨勫唴瀹�
+		ll_clicled = (RelativeLayout) findViewById(R.id.clicked_fl);
+		rl_title_clicked = (RelativeLayout) findViewById(R.id.title_clicked);
 		clicked_title_tv = (TextView) findViewById(R.id.title_clicked_tv);
-		gridview_add_tv = (TextView) findViewById(R.id.gridview_add_tv);
 		LayoutParams params = rl_title_clicked.getLayoutParams();
 		params.height = height;
 		rl_title_clicked.setLayoutParams(params);
@@ -122,6 +121,7 @@ public class DemoActivity2 extends FragmentActivity {
 
 	private void setListener() {
 		gv_content = (DynamicGridView) findViewById(R.id.dynamic_grid);
+//		gv_content.setSelector(R.drawable.content_color);
 		contentAdapter = new CheeseDynamicAdapter(this, contents, 4);
 		gv_content.setAdapter(contentAdapter);
 		gv_content
@@ -132,6 +132,7 @@ public class DemoActivity2 extends FragmentActivity {
 						if (!isEdit) {
 							isEdit = true;
 							bt_com.setVisibility(View.VISIBLE);
+							Log.i(tag, "show bt_com");
 							gv_content.startEditMode();
 							showDelete(position);
 							ll_add.setVisibility(View.INVISIBLE);
@@ -148,7 +149,7 @@ public class DemoActivity2 extends FragmentActivity {
 					pager.setCurrentItem(position);
 					contentAdapter.setSeclection(position);
 					contentAdapter.set(contents);
-				} 
+				}
 			}
 		});
 		addAdapter = new ArrayAdapter<String>(getApplicationContext(),
@@ -163,8 +164,8 @@ public class DemoActivity2 extends FragmentActivity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				String add = adds.get(position);
-				Toast.makeText(getApplicationContext(), "閫夋嫨娣诲姞" + add, 1000)
-						.show();
+				Toast.makeText(getApplicationContext(), "选择添加" + add,
+						Toast.LENGTH_SHORT).show();
 				adds.remove(add);
 				if (adds.size() == 0) {
 					ll_add.setVisibility(View.INVISIBLE);
@@ -182,9 +183,10 @@ public class DemoActivity2 extends FragmentActivity {
 
 	protected void showDelete(final int position) {
 		List<ImageView> list = contentAdapter.getImages();
-		for (int i = 1; i < list.size(); i++) {
+		for (int i = 2; i < list.size(); i++) {
 			final ImageView iv = list.get(i);
 			iv.setVisibility(View.VISIBLE);
+			Log.i(tag, "showDelete");
 			if (position != 0 || position != 1) {
 				iv.setOnClickListener(new OnClickListener() {
 					@Override
@@ -193,12 +195,14 @@ public class DemoActivity2 extends FragmentActivity {
 						List<String> items = contentAdapter.getItems();
 						contents.addAll(items);
 						String s = (String) v.getTag();
-						if(!s.equals("toutiao")&&!s.equals("sports")){
+						if (!s.equals("toutiao") && !s.equals("sports")) {
 							contents.remove(contents.indexOf(s));
-							clicked_title_tv.setText(contents.size() + "个未读栏目点击进入");
+							clicked_title_tv.setText(contents.size()
+									+ "个未读栏目点击进入");
 							adds.add(s);
 							addAdapter.notifyDataSetChanged();
 							contentAdapter.set(contents);
+//							contentAdapter.notifyDataSetChanged();
 							adapter.notifyDataSetChanged();
 							tabs.notifyDataSetChanged();
 						}
@@ -213,6 +217,7 @@ public class DemoActivity2 extends FragmentActivity {
 		for (ImageView iv : list) {
 			iv.setVisibility(View.INVISIBLE);
 		}
+		Log.i(tag, "hideDelete");
 	}
 
 	class MyOnclickListener implements OnClickListener {
@@ -235,7 +240,7 @@ public class DemoActivity2 extends FragmentActivity {
 				showNotClicked();
 				pager.setCurrentItem(pager.getCurrentItem());
 				break;
-			// 点击完成
+			// click the complete button
 			case R.id.gridview_content_bt:
 				if (gv_content.isEditMode()) {
 					isEdit = false;
@@ -246,8 +251,6 @@ public class DemoActivity2 extends FragmentActivity {
 					} else {
 						ll_add.setVisibility(View.INVISIBLE);
 					}
-//					if(!gv_content.isFirstDown())
-						gv_content.setFirstDown(true);
 					gv_content.clearFloatingView();
 					hideDelete();
 					sotrTabs();
@@ -274,48 +277,50 @@ public class DemoActivity2 extends FragmentActivity {
 			gv_content.stopEditMode();
 		}
 		contentAdapter.set(contents);
+		isMainTabPage = true;
 	}
 
-	@Override
-	public void onBackPressed() {
-		if (gv_content.isEditMode()) {
-			gv_content.stopEditMode();
-			hideDelete();
-			isEdit = false;
-			if (adds.size() > 0) {
-				ll_add.setVisibility(View.VISIBLE);
-			} else {
-				ll_add.setVisibility(View.INVISIBLE);
-			}
-		} else {
-			saveTabTileAndAddData();
-			super.onBackPressed();
-		}
-		gv_content.clearFloatingView();
-		if(!gv_content.isFirstDown()){
-			gv_content.setFirstDown(true);
-		}
-	}
+	
 
 	private void showClicked() {
+//		setNotDeleteItemsBG();
+//		setSelectItemsBG();
 		rl_title_clicked.setVisibility(View.VISIBLE);
 		int size = contents.size();
-		clicked_title_tv.setText(size +"个未读栏目点击进入");
+		clicked_title_tv.setText(size + "个未读栏目点击进入");
 		rl_content.setVisibility(View.INVISIBLE);
-//		contentAdapter.set(contents);
+		// contentAdapter.set(contents);
 		ll_clicled.setVisibility(View.VISIBLE);
 		if (adds.size() > 0) {
 			ll_add.setVisibility(View.VISIBLE);
 		} else {
 			ll_add.setVisibility(View.INVISIBLE);
 		}
+		isMainTabPage = false;
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+	/**
+	 * set the background of the items which can not be deleted in the gridview.
+	 */
+	private void setNotDeleteItemsBG(){
+		gv_content.getChildAt(0).setBackgroundColor(Color.LTGRAY);
+		gv_content.getChildAt(1).setBackgroundColor(Color.LTGRAY);
 	}
+	/**
+	 * set the background of the items which is selected in the gridview when use switch the UI from main page to the tabs sort page.
+	 */
+	private void setSelectItemsBG(){
+		int item=pager.getCurrentItem();
+		if(currentSelectedItem!=-1){
+			gv_content.getChildAt(currentSelectedItem).setBackgroundColor(Color.LTGRAY);
+			gv_content.getChildAt(item).setBackgroundColor(Color.RED);
+			currentSelectedItem=item;
+		}else{
+			gv_content.getChildAt(item).setBackgroundColor(Color.RED);
+			currentSelectedItem=item;
+		}
+	}
+	
 
 	public class MyPagerAdapter extends FragmentPagerAdapter {
 		public MyPagerAdapter(FragmentManager fm) {
@@ -340,8 +345,26 @@ public class DemoActivity2 extends FragmentActivity {
 	}
 
 	@Override
+	protected void onResume() {
+		if (!isMainTabPage) {
+			bt_com.setVisibility(View.INVISIBLE);
+			Log.i(tag, "onResume  hide bt_com");
+			hideDelete();
+			showClicked();
+		} else {
+			showNotClicked();
+		}
+		super.onResume();
+	}
+
+	@Override
 	protected void onPause() {
+		if (gv_content.isEditMode()) {
+			gv_content.stopEditMode();
+			isEdit = false;
+		}
 		saveTabTileAndAddData();
+		Log.i(tag, "onPause");
 		super.onPause();
 	}
 
@@ -356,9 +379,44 @@ public class DemoActivity2 extends FragmentActivity {
 		saveTabTileAndAddData();
 		super.onDestroy();
 	}
+	
+	@Override
+	public void onBackPressed() {
+		if (!isMainTabPage) {
+			if (gv_content.isEditMode()) {
+				gv_content.stopEditMode();
+				hideDelete();
+				isEdit = false;
+				bt_com.setVisibility(View.INVISIBLE);
+				if (adds.size() > 0) {
+					ll_add.setVisibility(View.VISIBLE);
+				} else {
+					ll_add.setVisibility(View.INVISIBLE);
+				}
+			} else {
+				showNotClicked();
+				saveTabTileAndAddData();
+			}
+			gv_content.clearFloatingView();
+		} else {
+			if ((System.currentTimeMillis() - exitTime) > 2000) {
+				Toast.makeText(getApplicationContext(), "再按一次退出程序",
+						Toast.LENGTH_SHORT).show();
+				exitTime = System.currentTimeMillis();
+			} else {
+				super.onBackPressed();
+			}
+		}
+
+	}
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
 
 	/**
-	 * 灏唗ab鏍忕殑鏍囬鍜宎dd鐨勫唴瀹瑰湪绋嬪簭閫�嚭鍓嶄互瀛楃涓茬殑褰㈠紡淇濆瓨鍦⊿haredPreferences閲屻�
+	 * 将tab栏的标题和add的内容在程序退出前以字符串的形式保存在SharedPreferences里。
 	 */
 	private void saveTabTileAndAddData() {
 		SharedPreferences sharedPreferences = getSharedPreferences(
@@ -372,7 +430,7 @@ public class DemoActivity2 extends FragmentActivity {
 	}
 
 	/**
-	 * 浠嶴haredPreferences閲屽彇鍑簍ab鏍忕殑鏍囬鍐呭
+	 * 从SharedPreferences里取出tab栏的标题内容
 	 * 
 	 * @return
 	 */
@@ -388,7 +446,7 @@ public class DemoActivity2 extends FragmentActivity {
 	}
 
 	/**
-	 * 浠嶴haredPreferences閲屽彇鍑簍ab鏍忕殑鏍囬鍐呭
+	 * 从SharedPreferences里取出tab栏的标题内容
 	 * 
 	 * @return
 	 */
@@ -403,7 +461,7 @@ public class DemoActivity2 extends FragmentActivity {
 	}
 
 	/**
-	 * 灏唋ist褰㈠紡杞崲鎴怱tring褰技銆�
+	 * 将list形式转换成String形似。
 	 * 
 	 * @return
 	 */
@@ -422,7 +480,7 @@ public class DemoActivity2 extends FragmentActivity {
 	}
 
 	/**
-	 * 灏嗗唴瀹逛粠瀛楃涓茬殑褰㈠紡杞崲鎴恖ist
+	 * 将内容从字符串的形式转换成list
 	 * 
 	 * @return
 	 */
