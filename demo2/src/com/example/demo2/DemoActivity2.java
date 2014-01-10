@@ -176,7 +176,7 @@ public class DemoActivity2 extends FragmentActivity {
 				adapter.notifyDataSetChanged();
 				tabs.notifyDataSetChanged();
 				int size = contents.size();
-				clicked_title_tv.setText(size + "个未读栏目点击进入");
+				clicked_title_tv.setText(size + getResources().getString(R.string.main_click_tv_title));
 			}
 		});
 	}
@@ -198,7 +198,7 @@ public class DemoActivity2 extends FragmentActivity {
 						if (!s.equals("toutiao") && !s.equals("sports")) {
 							contents.remove(contents.indexOf(s));
 							clicked_title_tv.setText(contents.size()
-									+ "个未读栏目点击进入");
+									+ getResources().getString(R.string.main_click_tv_title));
 							adds.add(s);
 							addAdapter.notifyDataSetChanged();
 							contentAdapter.set(contents);
@@ -287,7 +287,7 @@ public class DemoActivity2 extends FragmentActivity {
 //		setSelectItemsBG();
 		rl_title_clicked.setVisibility(View.VISIBLE);
 		int size = contents.size();
-		clicked_title_tv.setText(size + "个未读栏目点击进入");
+		clicked_title_tv.setText(size + getResources().getString(R.string.main_click_tv_title));
 		rl_content.setVisibility(View.INVISIBLE);
 		// contentAdapter.set(contents);
 		ll_clicled.setVisibility(View.VISIBLE);
@@ -400,7 +400,7 @@ public class DemoActivity2 extends FragmentActivity {
 			gv_content.clearFloatingView();
 		} else {
 			if ((System.currentTimeMillis() - exitTime) > 2000) {
-				Toast.makeText(getApplicationContext(), "再按一次退出程序",
+				Toast.makeText(getApplicationContext(), getResources().getString(R.string.main_toast_exit),
 						Toast.LENGTH_SHORT).show();
 				exitTime = System.currentTimeMillis();
 			} else {

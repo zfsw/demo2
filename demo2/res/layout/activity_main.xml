@@ -3,10 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity" >
+    tools:context=".MainActivity" 
+    android:background="#ffffff">
 
     <!-- 点击之前的效果 -->
 
+   
     <RelativeLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
@@ -81,7 +83,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:text="17个未读栏目点击进入" />
+                    />
 
                 <RelativeLayout
                     android:layout_width="50dp"
@@ -114,7 +116,7 @@
                     android:id="@+id/gridview_content_bt"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="完成"
+                    android:text="@string/main_click_bt_complete"
                     android:visibility="gone" />
 
                 <TextView
@@ -122,7 +124,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:text="长按排序或点击删除" />
+                    android:text="@string/main_click_tv_sort" />
             </RelativeLayout>
         </RelativeLayout>
         
@@ -135,7 +137,7 @@
                 android:columnWidth="90dp"
                 android:horizontalSpacing="10dp"
                 android:numColumns="4"
-                android:stretchMode="columnWidth"
+                android:stretchMode="spacingWidthUniform"
                 android:verticalSpacing="10dp" />
     </RelativeLayout>
 
@@ -159,7 +161,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="点击添加"
+                android:text="@string/main_click_tv_add"
                 android:textColor="#000000" />
 
             <com.example.demo2.BaseGridview
@@ -171,10 +173,9 @@
                 android:columnWidth="90dp"
                 android:horizontalSpacing="10dp"
                 android:numColumns="4"
-                android:stretchMode="columnWidth"
+                android:stretchMode="spacingWidthUniform"
                 android:verticalSpacing="10dp" >
             </com.example.demo2.BaseGridview>
         </LinearLayout>
     </RelativeLayout>
-
 </FrameLayout>

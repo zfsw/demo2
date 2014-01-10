@@ -35,7 +35,7 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 
 public class DynamicGridView extends BaseGridview {
-	private static final int INVALID_ID = AbstractDynamicGridAdapter.INVALID_ID;
+	private static final int INVALID_ID = CheeseDynamicAdapter.INVALID_ID;
 
 	private static final int MOVE_DURATION = 300;
 	private static final int SMOOTH_SCROLL_AMOUNT_AT_EDGE = 8;
@@ -302,8 +302,8 @@ public class DynamicGridView extends BaseGridview {
 		return getAdapterInterface().getColumnCount();
 	}
 
-	private AbstractDynamicGridAdapter getAdapterInterface() {
-		return ((AbstractDynamicGridAdapter) getAdapter());
+	private CheeseDynamicAdapter getAdapterInterface() {
+		return ((CheeseDynamicAdapter) getAdapter());
 	}
 
 	/**
@@ -343,7 +343,7 @@ public class DynamicGridView extends BaseGridview {
 
 	private void updateNeighborViewsForId(long itemId) {
 		int position = getPositionForID(itemId);
-		AbstractDynamicGridAdapter adapter = (AbstractDynamicGridAdapter) getAdapter();
+		CheeseDynamicAdapter adapter = (CheeseDynamicAdapter) getAdapter();
 		int nextPos = position + 1;
 		int prevPos = position - 1;
 		int prevAbovePos = position - getColumnCount() - 1;
@@ -381,7 +381,7 @@ public class DynamicGridView extends BaseGridview {
 	// update i from 0 to 2
 	public View getViewForId(long itemId) {
 		int firstVisiblePosition = getFirstVisiblePosition();
-		AbstractDynamicGridAdapter adapter = ((AbstractDynamicGridAdapter) getAdapter());
+		CheeseDynamicAdapter adapter = ((CheeseDynamicAdapter) getAdapter());
 		for (int i = 2; i < getChildCount(); i++) {
 			View v = getChildAt(i);
 			int position = firstVisiblePosition + i;

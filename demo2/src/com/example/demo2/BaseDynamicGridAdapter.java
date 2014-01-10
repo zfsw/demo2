@@ -1,7 +1,10 @@
 package com.example.demo2;
 
 import android.content.Context;
+import android.widget.BaseAdapter;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -9,25 +12,12 @@ import java.util.List;
  * Date: 9/7/13
  * Time: 10:49 PM
  */
-public abstract class BaseDynamicGridAdapter extends AbstractDynamicGridAdapter {
+public abstract class BaseDynamicGridAdapter extends BaseAdapter {
     private Context mContext;
-
+    public static final int INVALID_ID = -1;
+    private HashMap<Object, Integer> mIdMap = new HashMap<Object, Integer>();
     private ArrayList<Object> mItems = new ArrayList<Object>();
     private int mColumnCount;
-    interface NotifyDataCallback{
-    	public void onNotifyData();
-    }
-    private NotifyDataCallback mNotifyDataCallback;
-    
-
-    public NotifyDataCallback getmNotifyDataCallback() {
-		return mNotifyDataCallback;
-	}
-
-	public void setmNotifyDataCallback(NotifyDataCallback mNotifyDataCallback) {
-		this.mNotifyDataCallback = mNotifyDataCallback;
-	}
-
 	protected BaseDynamicGridAdapter(Context context, int columnCount) {
         this.mContext = context;
         this.mColumnCount = columnCount;
@@ -54,9 +44,6 @@ public abstract class BaseDynamicGridAdapter extends AbstractDynamicGridAdapter 
     public void clear() {
         clearStableIdMap();
         mItems.clear();
-        if(mNotifyDataCallback!=null){
-        	mNotifyDataCallback.onNotifyData();
-        }
         notifyDataSetChanged();
     }
 
@@ -91,7 +78,10 @@ public abstract class BaseDynamicGridAdapter extends AbstractDynamicGridAdapter 
         return mItems.get(position);
     }
 
-    @Override
+    /**
+     * @return return columns number for GridView. Need for compatibility
+     *         (@link android.widget.GridView#getNumColumns() requires api 11)
+     */
     public int getColumnCount() {
         return mColumnCount;
     }
@@ -101,7 +91,12 @@ public abstract class BaseDynamicGridAdapter extends AbstractDynamicGridAdapter 
         notifyDataSetChanged();
     }
 
-    @Override
+    /**
+     * Determines how to reorder items dragged from <code>originalPosition</code> to <code>newPosition</code>
+     *
+     * @param originalPosition
+     * @param newPosition
+     */
     public void reorderItems(int originalPosition, int newPosition) {
         DynamicGridUtils.reorder(mItems, originalPosition, newPosition);
         notifyDataSetChanged();
@@ -114,4 +109,72 @@ public abstract class BaseDynamicGridAdapter extends AbstractDynamicGridAdapter 
     protected Context getContext() {
         return mContext;
     }
+    
+    //******add
+    /**
+     * Adapter must have stable id
+     *
+     * @return
+     */
+    @Override
+    public final boolean hasStableIds() {
+        return true;
+    }
+
+    /**
+     * creates stable id for object
+     *
+     * @param item
+     */
+    protected void addStableId(Object item) {
+        int newId = (int) getItemId(getCount() - 1);
+        newId++;
+        mIdMap.put(item, newId);
+    }
+
+    /**
+     * create stable ids for list
+     *
+     * @param items
+     */
+    protected void addAllStableId(List<?> items) {
+        int startId = (int) getItemId(getCount() - 1);
+        startId++;
+        for (int i = startId; i < items.size(); i++) {
+            mIdMap.put(items.get(i), i);
+        }
+    }
+
+    /**
+     * get id for position
+     *
+     * @param position
+     * @return
+     */
+    @Override
+    public final long getItemId(int position) {
+        if (position < 0 || position >= mIdMap.size()) {
+            return INVALID_ID;
+        }
+        Object item = getItem(position);
+        return mIdMap.get(item);
+    }
+
+    /**
+     * clear stable id map
+     * should called when clear adapter data;
+     */
+    protected void clearStableIdMap() {
+        mIdMap.clear();
+    }
+
+    /**
+     * remove stable id for <code>item</code>. Should called on remove data item from adapter
+     *
+     * @param item
+     */
+    protected void removeStableID(Object item) {
+        mIdMap.remove(item);
+    }
+    //**********add over
 }

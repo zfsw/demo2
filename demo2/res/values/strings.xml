@@ -4,5 +4,10 @@
     <string name="app_name">demo2</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="main_click_bt_complete">完成</string>
+    <string name="main_click_tv_sort">长按排序或点击删除</string>
+    <string name="main_click_tv_add">点击添加</string>
+    <string name="main_click_tv_title">个未读栏目点击进入</string>
+    <string name="main_toast_exit">再按一次退出程序</string>
 </resources>
 
